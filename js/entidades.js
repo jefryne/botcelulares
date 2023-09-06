@@ -25,7 +25,7 @@ boton_modal_bot.addEventListener('click', ()=>{
     chat.append(label_saludo)
     document.addEventListener("keyup", function(event) {  
         if (event.code === 'Enter') {
-            if(user_input.value != null && user_input.value != null){
+            if(user_input.value != null && user_input.value != ""){
                 traducir(user_input.value,"entidad") 
             }
               
@@ -34,7 +34,7 @@ boton_modal_bot.addEventListener('click', ()=>{
 })
 
 boton_bot.addEventListener("click",()=>{
-    if(user_input.value != null && user_input.value != null){
+    if(user_input.value != null && user_input.value != ""){
         traducir(user_input.value,"entidad") 
     } 
 })
