@@ -25,13 +25,18 @@ boton_modal_bot.addEventListener('click', ()=>{
     chat.append(label_saludo)
     document.addEventListener("keyup", function(event) {  
         if (event.code === 'Enter') {
-            traducir(user_input.value,"entidad")   
+            if(user_input.value != null && user_input.value != null){
+                traducir(user_input.value,"entidad") 
+            }
+              
         }
     });
 })
 
 boton_bot.addEventListener("click",()=>{
-    traducir(user_input.value,"entidad") 
+    if(user_input.value != null && user_input.value != null){
+        traducir(user_input.value,"entidad") 
+    } 
 })
 
 
@@ -76,9 +81,10 @@ function peticionDeIntenciones(texto_intencio_detectar) {
         console.log(data_intenciones);
         intencion = data_intenciones.result.prediction.topIntent
         console.log(intencion);
+        let formular_pregunta_saludo = ""
         data_intenciones.result.prediction.entities.forEach(element => {
             if(element.category == "Saludo"){
-                let formular_pregunta_saludo = "Saludo"
+                formular_pregunta_saludo = "Saludo"
                 if (element.text == "buenos dias") {
                     formular_pregunta_saludo += " buenos dias"
                 }else if(element.text == "Buenas tardes"){
@@ -104,9 +110,14 @@ function peticionDeIntenciones(texto_intencio_detectar) {
             formular_pregunta = intencion+marca+precio
             console.log(formular_pregunta);
         });
-        setTimeout(() => {
+        if(formular_pregunta_saludo != ""){
+            setTimeout(() => {
+                peticionPreguntasrespuestas(formular_pregunta)
+            }, 2000);
+        }else{
             peticionPreguntasrespuestas(formular_pregunta)
-        }, 500); 
+        }
+         
     })
     .catch(error => {
         console.log(error);
