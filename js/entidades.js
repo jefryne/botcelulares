@@ -8,7 +8,7 @@ let boton_modal_bot = document.getElementById("boton_modal_bot")
 idioma_detectado = "es"
 texto_labels = "Nombre Usuario--Telefono Usuario--Precio telefono--Marca telefono--Correo electronico"
 // traerRegistros()
-
+let formular_pregunta_saludo = ""
 let marca = " "
 let intencion = ""
 let precio = " "
@@ -25,7 +25,7 @@ boton_modal_bot.addEventListener('click', ()=>{
     chat.append(label_saludo)
     document.addEventListener("keyup", function(event) {  
         if (event.code === 'Enter') {
-            if(user_input.value != null && user_input.value != null){
+            if(user_input.value != null && user_input.value != ""){
                 traducir(user_input.value,"entidad") 
             }
               
@@ -34,7 +34,7 @@ boton_modal_bot.addEventListener('click', ()=>{
 })
 
 boton_bot.addEventListener("click",()=>{
-    if(user_input.value != null && user_input.value != null){
+    if(user_input.value != null && user_input.value != ""){
         traducir(user_input.value,"entidad") 
     } 
 })
@@ -81,7 +81,7 @@ function peticionDeIntenciones(texto_intencio_detectar) {
         console.log(data_intenciones);
         intencion = data_intenciones.result.prediction.topIntent
         console.log(intencion);
-        let formular_pregunta_saludo = ""
+        
         data_intenciones.result.prediction.entities.forEach(element => {
             if(element.category == "Saludo"){
                 formular_pregunta_saludo = "Saludo"
@@ -113,7 +113,7 @@ function peticionDeIntenciones(texto_intencio_detectar) {
         if(formular_pregunta_saludo != ""){
             setTimeout(() => {
                 peticionPreguntasrespuestas(formular_pregunta)
-            }, 2000);
+            }, 3500);
         }else{
             peticionPreguntasrespuestas(formular_pregunta)
         }
@@ -285,9 +285,16 @@ function traducir(texto_traducir,accion) {
         }else if(accion == "respuesta"){
             let label_chat = document.createElement("div");
             label_chat.classList.add("alert", "alert-primary")
-            label_chat.textContent = data[0].translations[0].text
+            if(formular_pregunta_saludo != ""){
+                label_chat.textContent = data[0].translations[0].text+" "+nombreUsuario
+                hablar(textContent = data[0].translations[0].text+" "+nombreUsuario, idioma_detectado)
+                formular_pregunta_saludo = ""
+            }else{
+                label_chat.textContent = data[0].translations[0].text
+                hablar(textContent = data[0].translations[0].text, idioma_detectado)
+            }
             chat.append(label_chat)
-            hablar(textContent = data[0].translations[0].text, idioma_detectado)
+            
             console.log(intencion+"--"+marca+"--"+precio);
             if(intencion != "" && precio != " " && marca != " "){
                 traducir(texto_labels, "formulario")
