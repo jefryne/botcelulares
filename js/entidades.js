@@ -5,6 +5,7 @@ let boton_bot = document.getElementById("boton_bot")
 let chat = document.getElementById("chat")
 let cartas_registros = document.getElementById("cartas_registros")
 let boton_modal_bot = document.getElementById("boton_modal_bot")
+let boton_microfono = document.getElementById("boton_microfono")
 idioma_detectado = "es"
 texto_labels = "Nombre Usuario--Telefono Usuario--Precio telefono--Marca telefono--Correo electronico"
 // traerRegistros()
@@ -40,7 +41,6 @@ boton_bot.addEventListener("click",()=>{
 })
 
 
-
 function peticionDeIntenciones(texto_intencio_detectar) {
     let data_intenciones = {
         "kind":"Conversation",
@@ -60,10 +60,13 @@ function peticionDeIntenciones(texto_intencio_detectar) {
             "stringIndexType":"TextElement_V8"
         }
     }
-    let label_chat_usuario = document.createElement("div");
-    label_chat_usuario.classList.add("alert", "alert-warning")
-    label_chat_usuario.textContent = user_input.value
-    chat.append(label_chat_usuario)
+    if(user_input.value != null && user_input.value != ""){
+        let label_chat_usuario = document.createElement("div");
+        label_chat_usuario.classList.add("alert", "alert-warning")
+        label_chat_usuario.textContent = user_input.value
+        chat.append(label_chat_usuario)
+    }
+ 
     url = "https://bot-celulares.cognitiveservices.azure.com/language/:analyze-conversations?api-version=2022-10-01-preview"
     user_input.value = ""
     fetch(url,{
@@ -370,3 +373,68 @@ function traducir(texto_traducir,accion) {
     })
 }
 
+
+
+
+
+let audioContext = null;
+let recognizer = null;
+
+// Función para iniciar el AudioContext después de una interacción del usuario
+function iniciarAudioContext() {
+    // Verificar si el contexto ya está creado para evitar errores
+    if (audioContext === null) {
+        // Crear el contexto de audio
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Configuración de reconocimiento de voz
+        const speechConfig = SpeechSDK.SpeechConfig.fromSubscription("64bd01cdd7d94e569857f92701fd3a38", "eastus");
+
+        // Configura el idioma deseado (por ejemplo, español)
+        speechConfig.speechRecognitionLanguage = "es-ES"; // Cambia a tu idioma deseado
+
+        const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+
+        // Crear el reconocedor de voz
+        recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+        
+
+        recognizer.recognized = (s, e) => {
+            if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
+                console.log(e.result.text);
+                traducir(e.result.text,"entidad") 
+            }
+        };
+
+        recognizer.canceled = (s, e) => {
+            console.log(`CANCELED: Reason=${e.reason}`);
+
+            if (e.reason === SpeechSDK.CancellationReason.Error) {
+                console.log(`CANCELED: ErrorCode=${e.ErrorCode}`);
+                console.log(`CANCELED: ErrorDetails=${e.ErrorDetails}`);
+            }
+        };
+    }
+}
+
+// Agregar un evento de clic al botón para iniciar el reconocimiento
+document.getElementById('boton_microfono_star').addEventListener('click', () => {
+    iniciarAudioContext();
+
+    // Ocultar el botón de inicio y mostrar el botón de detener
+    document.getElementById('boton_microfono_star').style.display = 'none';
+    document.getElementById('boton_microfono_end').style.display = 'block';
+
+    // Iniciar el reconocimiento de voz continuo
+    recognizer.startContinuousRecognitionAsync();
+});
+
+// Agregar un evento de clic al botón para detener el reconocimiento
+document.getElementById('boton_microfono_end').addEventListener('click', () => {
+    // Detener el reconocimiento de voz
+    recognizer.stopContinuousRecognitionAsync();
+
+    // Ocultar el botón de detener y mostrar el botón de inicio
+    document.getElementById('boton_microfono_end').style.display = 'none';
+    document.getElementById('boton_microfono_star').style.display = 'block';
+});
