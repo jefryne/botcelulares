@@ -6,6 +6,7 @@ let chat = document.getElementById("chat")
 let cartas_registros = document.getElementById("cartas_registros")
 let boton_modal_bot = document.getElementById("boton_modal_bot")
 let boton_microfono = document.getElementById("boton_microfono")
+let texto_de_voz = ""
 idioma_detectado = "es"
 texto_labels = "Nombre Usuario--Telefono Usuario--Precio telefono--Marca telefono--Correo electronico"
 // traerRegistros()
@@ -64,6 +65,11 @@ function peticionDeIntenciones(texto_intencio_detectar) {
         let label_chat_usuario = document.createElement("div");
         label_chat_usuario.classList.add("alert", "alert-warning")
         label_chat_usuario.textContent = user_input.value
+        chat.append(label_chat_usuario)
+    }else if(texto_de_voz != ""){
+        let label_chat_usuario = document.createElement("div");
+        label_chat_usuario.classList.add("alert", "alert-warning")
+        label_chat_usuario.textContent = texto_de_voz
         chat.append(label_chat_usuario)
     }
  
@@ -260,7 +266,7 @@ function hablar(texto_hablar, idioma_hablar) {
     
         // Reproduce automáticamente el audio
         audio.play();
-
+        texto_de_voz=""
     })
     .catch((error) => {
         console.error('Error:', error);
@@ -402,7 +408,8 @@ function iniciarAudioContext() {
         recognizer.recognized = (s, e) => {
             if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
                 console.log(e.result.text);
-                traducir(e.result.text,"entidad") 
+                texto_de_voz = e.result.text
+                traducir(texto_de_voz,"entidad") 
             }
         };
 
